@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.loyofo.activemq.boot</groupId>
-    <artifactId>provider</artifactId>
+    <artifactId>producer</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>provider</name>
+    <name>producer</name>
     <description>Demo project for Spring Boot</description>
 
     <properties>

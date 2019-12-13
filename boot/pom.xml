@@ -15,7 +15,7 @@
 
     <modules>
         <module>consumer</module>
-        <module>provider</module>
+        <module>producer</module>
     </modules>
 
     

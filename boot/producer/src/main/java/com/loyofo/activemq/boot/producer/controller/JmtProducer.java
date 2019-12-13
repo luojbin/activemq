@@ -1,4 +1,4 @@
-package com.loyofo.activemq.boot.provider.controller;
+package com.loyofo.activemq.boot.producer.controller;
 
 import org.apache.activemq.command.ActiveMQQueue;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import java.util.Map;
 
 @RequestMapping("jmt")
 @RestController
-public class JmtProvider {
+public class JmtProducer {
     @Autowired
     private JmsMessagingTemplate messagingTemplate;
 

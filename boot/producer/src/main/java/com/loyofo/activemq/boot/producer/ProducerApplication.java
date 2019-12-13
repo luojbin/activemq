@@ -1,4 +1,4 @@
-package com.loyofo.activemq.boot.provider;
+package com.loyofo.activemq.boot.producer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,10 +6,10 @@ import org.springframework.jms.annotation.EnableJms;
 
 @SpringBootApplication
 @EnableJms
-public class ProviderApplication {
+public class ProducerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ProviderApplication.class, args);
+        SpringApplication.run(ProducerApplication.class, args);
     }
 
 }
