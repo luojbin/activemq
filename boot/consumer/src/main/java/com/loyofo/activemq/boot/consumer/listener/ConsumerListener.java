@@ -43,4 +43,10 @@ public class ConsumerListener {
         System.out.println("死信队列...." + message.getPayload());
         System.out.println("死信队列...." + message.getHeaders());
     }
+
+    @JmsListener(destination="exception")
+    private void exception(Message<?> message) {
+        System.out.println("异常队列, 不应该收到消息...." + message.getPayload());
+        System.out.println("异常队列, 不应该收到消息...." + message.getHeaders());
+    }
 }

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans         http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/tx			http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop			http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<description>Spring JmsTemplate with ActiveMQ</description>
+
+	<!-- Jms 事务控制 -->
+	<bean id="jmsTransactionManager" class="org.springframework.jms.connection.JmsTransactionManager">
+		<property name="ConnectionFactory" ref="pooledJmsConnectionFactory" />
+	</bean>
+
+	<tx:advice id="jmsTxAdvice" transaction-manager="jmsTransactionManager">
+		<tx:attributes>
+			<tx:method name="send*" rollback-for="java.lang.Exception" />
+		</tx:attributes>
+	</tx:advice>
+	
+	<aop:config>
+		<aop:pointcut id="jmsMethod" expression="@annotation(com.loyofo.activemq.boot.producer.config.JmsTx)" />
+		<aop:advisor advice-ref="jmsTxAdvice" pointcut-ref="jmsMethod" />
+	</aop:config>
+	
+</beans>

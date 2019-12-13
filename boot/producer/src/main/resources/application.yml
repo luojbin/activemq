@@ -2,6 +2,7 @@ server:
   port: 8001
 
 spring:
+  # activemq
   activemq:
     broker-url: tcp://192.168.30.101:61616
     user: ryun
@@ -11,3 +12,10 @@ spring:
       enabled: true
       max-connections: 10
       idle-timeout: 30000
+  # 数据库
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://47.104.220.222:8063/test?useSSL=false
+    username: luojbin
+    password: luojbin2@Dev

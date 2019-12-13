@@ -1,8 +1,11 @@
 package com.loyofo.activemq.boot.producer.controller;
 
+import com.loyofo.activemq.boot.producer.config.JmsTx;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jms.core.JmsMessagingTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +19,8 @@ import java.util.Map;
 public class JmtProducer {
     @Autowired
     private JmsMessagingTemplate messagingTemplate;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @PostMapping("sendDemo")
     public String send(String message) {
@@ -50,6 +55,19 @@ public class JmtProducer {
     public String sendDlq(String message) {
         messagingTemplate.convertAndSend("retry", message);
         return "jmt 消息重发与死信 发送成功";
+    }
+
+    @PostMapping("sendEx")
+    @Transactional(value = "dataSourceTransactionManager")
+    @JmsTx
+    public String sendEx(String message) {
+        messagingTemplate.convertAndSend("exception", message);
+        String sql = "insert into tx_test (msg) value (?)";
+        jdbcTemplate.update(sql, message);
+        if ("exception".equals(message)){
+            throw new RuntimeException();
+        }
+        return "jmt 事务回滚 发送成功";
     }
 
 }
