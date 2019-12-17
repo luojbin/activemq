@@ -1,0 +1,22 @@
+server:
+  port: 9003
+
+spring:
+  application:
+    name: spring-boot-activemq-producer
+  activemq:
+    broker-url: tcp://my-server-activemq:8062
+#    user: admin
+#    password: admin
+    in-memory: false
+    pool:
+      enabled: true
+      max-connections: 10
+      idle-timeout: 30000
+  # 数据库
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://my-server-mysql:8063/test?useSSL=false
+    username: luojbin
+    password: luojbin2@Dev

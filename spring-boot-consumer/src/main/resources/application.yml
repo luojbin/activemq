@@ -1,0 +1,16 @@
+server:
+  port: 9004
+
+spring:
+  application:
+    name: spring-boot-activemq-consumer
+  activemq:
+    broker-url: tcp://my-server-activemq:8062
+#    user: admin
+#    password: admin
+    in-memory: false
+    pool:
+      enabled: true
+      max-connections: 10
+      idle-timeout: 30000
+
