@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans			http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util			http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/tx			http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop			http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/context 		http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<description>Spring JDBC</description>
+
+	<!-- 配置组件扫描 -->
+	<context:component-scan base-package="com.jitai.amqDemo"/>
+
+	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${jdbc.mysql.jdbcdriver}" />
+		<property name="jdbcUrl" value="${jdbc.mysql.url}" />
+		<property name="username" value="${jdbc.mysql.username}" />
+		<property name="password" value="${jdbc.mysql.password}" />
+		<property name="maximumPoolSize" value="${jdbc.maximumPoolSize}" />
+		<property name="minimumIdle" value="${jdbc.minimumIdle}" />
+		<property name="dataSourceProperties">
+			<props>
+				<prop key="cachePrepStmts">true</prop>
+				<prop key="prepStmtCacheSize">250</prop>
+				<prop key="prepStmtCacheSqlLimit">2048</prop>
+				<prop key="useServerPrepStmts">true</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="fetchSize" value="${jdbcTemplate.fetchSize}"/>
+	</bean>
+
+	<!-- jdbc 事务控制 -->
+	<bean id="jdbcTransactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<tx:advice id="jdbcTxAdvice" transaction-manager="jdbcTransactionManager">
+		<tx:attributes>
+			<tx:method name="insert*" propagation="REQUIRED"/>
+			<tx:method name="save*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="create*" propagation="REQUIRED" />
+			<tx:method name="delete*" propagation="REQUIRED" />
+			<tx:method name="remove*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="edit*" propagation="REQUIRED" />
+			<tx:method name="select*" propagation="REQUIRED" read-only="true" />
+			<tx:method name="query*" propagation="REQUIRED" read-only="true" />
+			<tx:method name="exists*" propagation="REQUIRED" read-only="true" />
+			<tx:method name="get*" propagation="REQUIRED" read-only="true" />
+			<tx:method name="load*" propagation="REQUIRED" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+
+	<aop:config>
+		<aop:pointcut id="allJdbcMethod"
+			expression="execution(* com.jitai.amqDemo.service.*.*(..))" />
+		<aop:advisor advice-ref="jdbcTxAdvice" pointcut-ref="allJdbcMethod" />
+	</aop:config>
+</beans>

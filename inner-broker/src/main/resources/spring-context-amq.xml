@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:jms="http://www.springframework.org/schema/jms"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans         http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util 		 http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/jms         http://www.springframework.org/schema/jms/spring-jms.xsd
+        http://www.springframework.org/schema/tx			http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop			http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<description>Spring JmsTemplate with ActiveMQ</description>
+
+	<!-- 定义嵌入式 amq broker -->
+	<!-- <bean id="broker" class="org.apache.activemq.broker.BrokerService"
+		init-method="start" destroy-method="stop">
+		<property name="brokerName" value="innerBroker" />
+		<property name="persistent" value="true" />
+		<property name="transportConnectorURIs">
+			<list>
+				<value>${activemq.inner.host}</value>
+			</list>
+		</property>
+	</bean> -->
+	
+	<!-- Amq 连接工厂 -->
+	<bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+		<property name="userName" value="admin" />
+		<property name="password" value="admin" />
+		<property name="brokerURL">
+			<value>${activemq.broker.url}</value>
+		</property>
+		<!-- amq默认只支持少量类型的 ObjectMessage, 可以指定信任的包, 或信任所有包 -->
+		<property name="trustAllPackages" value="true"/>
+	</bean>
+	
+	<!-- ActiveMQ 连接池 -->
+	<bean id="jmsFactory" class="org.apache.activemq.pool.PooledConnectionFactory"
+		init-method="start" destroy-method="stop">
+		<property name="connectionFactory" ref="connectionFactory" />
+		<property name="maxConnections" value="100"></property>
+	</bean>
+	
+	<!-- jmsTemplate -->
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<property name="connectionFactory" ref="jmsFactory" />
+		<!-- 可以设置默认目的地, 则发送消息时不需重复指定 -->
+		<property name="defaultDestination" ref="innerBrokerQueue" />
+		<!-- 消息确认模式, 1表示自动确认 -->
+		<property name="sessionAcknowledgeMode" value="1" />
+	</bean>
+
+	<!-- 配置默认目的地  destination -->
+	<bean id="innerBrokerQueue" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="innerBrokerQueue" />
+	</bean>
+
+	<!-- 启动 jms 注解扫描 -->
+	<jms:annotation-driven/>
+	<!-- listenerContainer 工厂, 配置后就可以使用 @JmsListener -->
+	<bean id="jmsListenerContainerFactory" class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+	    <property name="connectionFactory" ref="jmsFactory"/>
+	    <property name="sessionTransacted" value="true"/>
+	    <!-- 并发, 相当于有每一个队列都有多个消费者 -->
+	    <property name="concurrency" value="3-10"/>
+	</bean>
+
+	<!-- Jms 事务控制 -->
+	<bean id="jmsTransactionManager"
+		class="org.springframework.jms.connection.JmsTransactionManager">
+		<property name="ConnectionFactory" ref="jmsFactory" />
+	</bean>
+
+	<tx:advice id="jmsTxAdvice" transaction-manager="jmsTransactionManager">
+		<tx:attributes>
+			<tx:method name="insert*" propagation="REQUIRED" />
+			<tx:method name="save*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+		</tx:attributes>
+	</tx:advice>
+	
+	<aop:config>
+		<aop:pointcut id="allJmsMethod"
+			expression="execution(* com.jitai.amqDemo.service.*.*(..))" />
+		<aop:advisor advice-ref="jmsTxAdvice" pointcut-ref="allJmsMethod" />
+	</aop:config>
+	
+</beans>

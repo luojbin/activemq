@@ -10,11 +10,10 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>common</module>
-        <module>origin</module>
         <module>spring-producer</module>
         <module>spring-consumer</module>
         <module>spring-boot-producer</module>
         <module>spring-boot-consumer</module>
+        <module>inner-broker</module>
     </modules>
 </project>
